@@ -1,0 +1,24 @@
+[package]
+name = "llm_web"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+axum = { version = "0.7.4", features = ["macros"] }
+candle-core = { git = "https://github.com/huggingface/candle.git", version = "0.4.0" }
+candle-lora = { git = "https://github.com/EricLBuehler/candle-lora.git", version = "0.2.0" }
+candle-lora-macro = { git = "https://github.com/EricLBuehler/candle-lora.git", version = "0.2.0" }
+candle-nn = { git = "https://github.com/huggingface/candle.git", version = "0.4.0" }
+chrono = "0.4.33"
+rand = "0.8.5"
+serde = { version = "1.0.196", features = ["derive"] }
+thiserror = "1.0.56"
+tokenizers = "0.15.2"
+tokio = { version = "1.35.1", features = ["full"] }
+tower-http = { version = "0.5.1", features = ["cors"] }
+tqdm = "0.6.0"
+tracing = "0.1.40"
+validator = { version = "0.16.1", features = ["derive"] }
+walkdir = "2.4.0"
