@@ -14,7 +14,7 @@ use serde::{Deserialize, Serialize};
 use validator::Validate;
 
 pub fn api() -> Router {
-    Router::new().route("/hello", get(chat))
+    Router::new().route("/chat", post(chat))
 }
 
 #[derive(Debug, Serialize, Deserialize)]

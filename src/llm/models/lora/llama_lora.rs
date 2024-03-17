@@ -1,9 +1,7 @@
 //! The LLama2 model.
 
 use candle_core::{DType, Device, IndexOp, Result, Tensor, D};
-use candle_lora::{
-    EmbeddingLayerLike, LinearLayerLike, LoraConfig, LoraEmbeddingConfig, LoraLinearConfig,
-};
+use candle_lora::{EmbeddingLayerLike, LoraConfig, LoraEmbeddingConfig, LoraLinearConfig};
 use candle_lora_macro::{self, replace_layer_fields, AutoLoraConvert};
 use candle_nn::{Embedding, Module, VarBuilder};
 use serde::Deserialize;
@@ -90,29 +88,17 @@ impl Config {
 
 // We wrap the `LlamaLinear` layer here to add some tracing so that it's easier to profile the resulting
 // model.
-#[derive(Debug, AutoLoraConvert)]
+#[derive(Debug, AutoLoraConvert, Clone)]
 #[replace_layer_fields]
 pub struct LlamaLinear {
-    inner: Box<dyn LinearLayerLike>,
+    inner: candle_nn::Linear,
     span: tracing::Span,
 }
 
 impl Module for LlamaLinear {
-    fn forward(&self, x: &Tensor) -> Result<Tensor> {
+    fn forward(&self, xs: &Tensor) -> Result<Tensor> {
         let _enter = self.span.enter();
-        self.inner.forward(x)
-    }
-}
-
-impl LinearLayerLike for LlamaLinear {
-    fn bias(&self) -> Option<&Tensor> {
-        self.inner.bias()
-    }
-    fn weight(&self) -> &Tensor {
-        self.inner.weight()
-    }
-    fn shape(&self) -> &candle_core::Shape {
-        self.inner.shape()
+        self.inner.forward(xs)
     }
 }
 
@@ -177,10 +163,7 @@ impl Cache {
 fn linear(size1: usize, size2: usize, vb: VarBuilder) -> Result<LlamaLinear> {
     let span = tracing::span!(tracing::Level::TRACE, "linear");
     let inner = candle_nn::linear_no_bias(size1, size2, vb).unwrap();
-    Ok(LlamaLinear {
-        inner: Box::new(inner),
-        span,
-    })
+    Ok(LlamaLinear { inner: inner, span })
 }
 
 fn embedding(cfg: &Config, vb: VarBuilder) -> Result<Embedding> {
@@ -189,7 +172,7 @@ fn embedding(cfg: &Config, vb: VarBuilder) -> Result<Embedding> {
 }
 
 #[replace_layer_fields]
-#[derive(AutoLoraConvert)]
+#[derive(AutoLoraConvert, Clone)]
 struct RmsNorm {
     inner: candle_nn::RmsNorm,
     span: tracing::Span,
@@ -209,7 +192,7 @@ impl RmsNorm {
 }
 
 #[replace_layer_fields]
-#[derive(AutoLoraConvert)]
+#[derive(AutoLoraConvert, Clone)]
 struct CausalSelfAttention {
     q_proj: LlamaLinear,
     k_proj: LlamaLinear,
@@ -440,6 +423,7 @@ fn masked_fill(on_false: &Tensor, mask: &Tensor, on_true: f32) -> Result<Tensor>
     Ok(m)
 }
 
+#[derive(Debug, Clone)]
 struct Mlp {
     c_fc1: LlamaLinear,
     c_fc2: LlamaLinear,
@@ -473,7 +457,7 @@ impl Mlp {
 }
 
 #[replace_layer_fields]
-#[derive(AutoLoraConvert)]
+#[derive(AutoLoraConvert, Clone)]
 struct Block {
     rms_1: RmsNorm,
     attn: CausalSelfAttention,
@@ -555,15 +539,15 @@ impl Block {
 }
 
 #[replace_layer_fields]
-#[derive(AutoLoraConvert)]
-pub struct Llama {
+#[derive(AutoLoraConvert, Clone)]
+pub struct LlamaLora {
     wte: Embedding,
     blocks: Vec<Block>,
     ln_f: RmsNorm,
-    lm_head: Box<dyn LinearLayerLike>,
+    lm_head: LlamaLinear,
 }
 
-impl Llama {
+impl LlamaLora {
     pub fn forward(&self, x: &Tensor, index_pos: usize) -> Result<Tensor> {
         // let (_b_sz, seq_len) = x.dims2().unwrap();
         let mut x = self.wte.forward(x).unwrap();
@@ -612,7 +596,7 @@ impl Llama {
             wte: Arc::new(wte),
             blocks,
             ln_f,
-            lm_head: Box::new(lm_head),
+            lm_head,
         };
 
         if merge {
