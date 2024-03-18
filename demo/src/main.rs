@@ -7,8 +7,8 @@ mod utility;
 
 #[tokio::main]
 async fn main() {
-    // let dir = "/Users/yousx/models/meta_llama";
-    let dir = "/Users/yousx/models/lora";
+    let dir = "/Users/yousx/models/meta_llama";
+    // let dir = "/Users/yousx/models/lora";
 
     // let mut llm = llm::LLM::new(dir);
 
