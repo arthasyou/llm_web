@@ -6,10 +6,10 @@ pub mod token_output_stream;
 pub mod train;
 mod util;
 
-use candle_core::{DType, Device};
+use candle_core::Device;
 use models::{
     llama::{Cache, Llama},
-    lora::llama_lora::LlamaLora,
+    lora::llama_lora::{self, LlamaLora},
 };
 use token_output_stream::TokenOutputStream;
 use tokenizers::Tokenizer;
@@ -46,12 +46,13 @@ pub struct LoraLLM {
     pub model: LlamaLora,
     pub tokenizer: Tokenizer,
     pub token_output: TokenOutputStream,
+    pub cache: llama_lora::Cache,
 }
 
 impl LoraLLM {
     pub fn new(dir: &str) -> Self {
         let device = Device::Cpu;
-        let model = load_llm::load_lora_model(dir, &device).unwrap();
+        let (model, cache) = load_llm::load_lora_model(dir, &device).unwrap();
         let tokenizer = load_llm::load_tokenizer(dir);
         let token_output = TokenOutputStream::new(tokenizer.clone());
 
@@ -60,6 +61,7 @@ impl LoraLLM {
             model,
             tokenizer,
             token_output,
+            cache,
         }
     }
 }
