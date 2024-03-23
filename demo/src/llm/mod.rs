@@ -11,6 +11,7 @@ use models::{
     llama::{Cache, Llama},
     lora::llama_lora::{self, LlamaLora},
 };
+use serde::Deserialize;
 use token_output_stream::TokenOutputStream;
 use tokenizers::Tokenizer;
 
@@ -50,8 +51,8 @@ pub struct LoraLLM {
 }
 
 impl LoraLLM {
-    pub fn new(dir: &str) -> Self {
-        let device = load_llm::device(true).unwrap();
+    pub fn new(dir: &str, cpu: bool) -> Self {
+        let device = load_llm::device(cpu).unwrap();
         let (model, cache) = load_llm::load_lora_model(dir, &device).unwrap();
         let tokenizer = load_llm::load_tokenizer(dir);
         let token_output = TokenOutputStream::new(tokenizer.clone());
@@ -64,4 +65,10 @@ impl LoraLLM {
             cache,
         }
     }
+}
+
+#[derive(Debug, Deserialize)]
+pub struct LLMCfg {
+    pub use_cpu: bool,
+    pub model_dir: String,
 }

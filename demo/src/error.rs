@@ -7,6 +7,8 @@ pub enum Error {
     IoError(#[from] std::io::Error),
     #[error("Tensor Error ")]
     TensorError(#[from] candle_core::error::Error),
+    #[error("Config Error ")]
+    ConfigError(#[from] config::ConfigError),
 }
 
 pub type Result<T> = core::result::Result<T, Error>;

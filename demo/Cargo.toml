@@ -26,3 +26,4 @@ tracing = "0.1.40"
 trc = "1.2.4"
 validator = { version = "0.16.1", features = ["derive"] }
 walkdir = "2.4.0"
+config = "0.14.0"
