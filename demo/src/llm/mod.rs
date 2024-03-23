@@ -25,7 +25,7 @@ pub struct LLM {
 
 impl LLM {
     pub fn new(dir: &str) -> Self {
-        let device = Device::Cpu;
+        let device = load_llm::device(true).unwrap();
         let (model, mut cache) = load_llm::load_model(dir, &device).unwrap();
         let tokenizer = load_llm::load_tokenizer(dir);
         let token_output = TokenOutputStream::new(tokenizer.clone());
@@ -51,7 +51,7 @@ pub struct LoraLLM {
 
 impl LoraLLM {
     pub fn new(dir: &str) -> Self {
-        let device = Device::Cpu;
+        let device = load_llm::device(true).unwrap();
         let (model, cache) = load_llm::load_lora_model(dir, &device).unwrap();
         let tokenizer = load_llm::load_tokenizer(dir);
         let token_output = TokenOutputStream::new(tokenizer.clone());
