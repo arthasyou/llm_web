@@ -359,7 +359,9 @@ version = "0.4.2"
 source = "git+https://github.com/huggingface/candle.git#184105792f1d5c70ac07da4832938f3963c740dc"
 dependencies = [
  "candle-core",
+ "candle-metal-kernels",
  "half",
+ "metal",
  "num-traits",
  "rayon",
  "safetensors",

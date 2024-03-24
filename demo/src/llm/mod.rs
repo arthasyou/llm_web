@@ -71,4 +71,5 @@ impl LoraLLM {
 pub struct LLMCfg {
     pub use_cpu: bool,
     pub model_dir: String,
+    pub port: u16,
 }

@@ -1,3 +1,4 @@
 [llm]
 use_cpu = true
 model_dir = "/Users/yousx/models/meta_llama"
+port = 3000

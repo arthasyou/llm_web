@@ -20,6 +20,7 @@ async fn main() {
     let mut llm = llm::LoraLLM::new(&settings.llm.model_dir, settings.llm.use_cpu);
 
     let routes = routes::create_routes(llm);
-    let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
+    let url = format!("0.0.0.0:{}", settings.llm.port);
+    let listener = tokio::net::TcpListener::bind(&url).await.unwrap();
     axum::serve(listener, routes).await.unwrap();
 }
