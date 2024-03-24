@@ -16,7 +16,7 @@ use tokenizers::Tokenizer;
 pub fn load_model(dir: &str, device: &Device) -> Result<(Llama, Cache)> {
     println!("initializing model........");
 
-    let config = Config::config_1b(false);
+    let config = Config::config_7b_v2(false);
     let cache = Cache::new(false, DType::F32, &config, &device)?;
     let varmap = VarMap::new();
     let paths = crate::utility::find_files_with_extension(dir, "safetensors").unwrap();
@@ -32,7 +32,7 @@ pub fn load_model(dir: &str, device: &Device) -> Result<(Llama, Cache)> {
 pub fn load_lora_model(dir: &str, device: &Device) -> Result<(LlamaLora, llama_lora::Cache)> {
     println!("initializing model........");
 
-    let config = llama_lora::Config::config_1b(false);
+    let config = llama_lora::Config::config_7b_v2(false);
     let cache = llama_lora::Cache::new(false, DType::F32, &config, &device)?;
     let varmap = VarMap::new();
     let paths = crate::utility::find_files_with_extension(dir, "safetensors").unwrap();
