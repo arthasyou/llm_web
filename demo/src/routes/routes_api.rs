@@ -37,7 +37,7 @@ pub async fn chat_lora(
     Extension(mut llm): Extension<LoraLLM>,
     Json(parames): Json<Chat>,
 ) -> Result<Json<Chat>, StatusCode> {
-    let text = predict::run_lora(&parames.text, &mut llm);
+    let text = predict::run_lora(&parames.text, &mut llm, 200);
     let chat = Chat { text };
     Ok(Json(chat))
 }

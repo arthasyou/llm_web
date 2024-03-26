@@ -53,7 +53,7 @@ pub fn run(prompt: &str, llm: &mut LLM) -> String {
     result
 }
 
-pub fn run_lora(prompt: &str, llm: &mut LoraLLM) -> String {
+pub fn run_lora(prompt: &str, llm: &mut LoraLLM, max_len: usize) -> String {
     // print!("{:#?}", llm);
     let mut logits_processor = LogitsProcessor::new(1981, Some(0.7_f64), Some(0.7_f64));
     // println!("{:#?}", logits_processor);
@@ -72,7 +72,7 @@ pub fn run_lora(prompt: &str, llm: &mut LoraLLM) -> String {
 
     let mut result = "".to_string();
 
-    for index in 0..10 {
+    for index in 0..max_len {
         let (context_size, context_index) = if llm.cache.use_kv_cache && index > 0 {
             (1, index_pos)
         } else {
